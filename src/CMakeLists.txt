@@ -9,6 +9,7 @@ add_library (creqhttp
 target_include_directories (creqhttp
 	PUBLIC
 	${SSL_INCLUDE_DIRS}
+	"../include"
 	)
 
 target_link_libraries (creqhttp
