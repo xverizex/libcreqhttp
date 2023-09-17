@@ -1,6 +1,11 @@
 #ifndef CREQ_HTTP_H
 #define CREQ_HTTP_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <epoll.h>
+
 enum {
 	REQ_UNSUPPORTED,
 	REQ_GET,
