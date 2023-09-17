@@ -15,5 +15,3 @@ target_include_directories (creqhttp
 target_link_libraries (creqhttp
 	${SSL_LIBRARIES}
 	)
-
-set (EXECUTABLE_OUTPUT_PATH ..)
