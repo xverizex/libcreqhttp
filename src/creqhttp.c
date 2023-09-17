@@ -45,7 +45,7 @@ static int is_num (char *s) {
 	return 1;
 }
 
-static void free_http (http_req *req) {
+void free_http (http_req *req) {
 	if (req) {
 		for (int i = 0; i < req->fields_size; i++) {
 			if (req->fields) {
@@ -413,7 +413,6 @@ int creqhttp_init_connection (creqhttp *cq) {
 
 
 int creqhttp_accept_connections (creqhttp *cq) {
-	sleep (3);
 
 	while (1) {
 		int ret;

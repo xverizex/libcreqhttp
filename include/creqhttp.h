@@ -106,5 +106,6 @@ typedef struct _creqhttp_params {
 int creqhttp_init_connection (creqhttp *cq);
 creqhttp *creqhttp_init (creqhttp_params *args);
 int creqhttp_accept_connections (creqhttp *cq);
+void free_http (http_req *);
 http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len);
 #endif
