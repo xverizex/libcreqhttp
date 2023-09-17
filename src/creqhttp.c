@@ -413,9 +413,7 @@ int creqhttp_init_connection (creqhttp *cq) {
 
 
 int creqhttp_accept_connections (creqhttp *cq) {
-#define SIZE_DATA      16384
-	uint8_t data[SIZE_DATA];
-	creqhttp_data cq_data;
+	sleep (3);
 
 	while (1) {
 		int ret;
