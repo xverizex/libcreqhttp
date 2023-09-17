@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <epoll.h>
+#include <sys/epoll.h>
 
 enum {
 	REQ_UNSUPPORTED,
