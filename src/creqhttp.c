@@ -412,7 +412,7 @@ int creqhttp_init_connection (creqhttp *cq) {
 
 	if (cq->is_ssl) {
 		const SSL_METHOD *method = NULL;
-		method = SSLv23_server_method ();
+		method = TLSv1_2_server_method ();
 		cq->ctx = SSL_CTX_new (method);
 		if (cq->ctx == NULL) {
 			//ERR_print_errors_fp (stderr);
