@@ -335,6 +335,8 @@ static void *thread_handle (void *_data) {
 				close (v->fd);
 				continue;
 			}
+			data[ret] = 0;
+			printf ("readed: %d\n", ret);
 
 			v->data.data = data;
 			v->data.len = ret;
