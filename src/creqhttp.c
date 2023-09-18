@@ -326,9 +326,15 @@ static void *thread_handle (void *_data) {
 			creqhttp_epoll_event *v = (creqhttp_epoll_event *) cq->events[n].data.ptr;
 			creqhttp *cq = v->cq;
 
-			int ret = v->is_ssl ?
-				SSL_read (v->ssl, data, cq->max_buffer_size):
-				read (v->fd, data, cq->max_buffer_size);
+			int ret;
+			if (v->is_ssl) {
+				printf ("ssl read\n");
+				ret = SSL_read (v->ssl, data, cq->max_buffer_size):
+			} else {
+				printf ("open read\n");
+				ret = read (v->fd, data, cq->max_buffer_size);
+			}
+			printf ("readed: %d\n", ret);
 
 			if (ret <= 0) {
 				epoll_ctl (cq->epollfd, EPOLL_CTL_DEL, v->fd, NULL);
@@ -336,7 +342,7 @@ static void *thread_handle (void *_data) {
 				continue;
 			}
 			data[ret] = 0;
-			printf ("readed: %d\n", ret);
+			printf ("--\n%s--\n", v->data.data);
 
 			v->data.data = data;
 			v->data.len = ret;
