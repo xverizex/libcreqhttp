@@ -351,6 +351,9 @@ static void *thread_handle (void *_data) {
 					SSL_write (v->ssl, v->data.ans_data, v->data.ans_len):
 					write (v->fd, v->data.ans_data, v->data.ans_len);
 			}
+
+			epoll_ctl (cq->epollfd, EPOLL_CTL_DEL, v->fd, NULL);
+			close (v->fd);
 		}
 	}
 }
