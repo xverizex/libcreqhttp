@@ -371,12 +371,13 @@ creqhttp *creqhttp_init (creqhttp_params *args) {
 	cq->ctx = NULL;
 	cq->ssl = NULL;
 
-	pthread_create (&cq->thread_event, NULL, thread_handle, cq);
 
 	cq->max_buffer_size = args->is_ssl ? MAX_SSL_SIZE: MAX_OPEN_SIZE;	
 	cq->cb_init_connection = args->is_ssl ? 
 		cb_init_connection_ssl_fd: 
 		cb_init_connection_open_fd;
+
+	pthread_create (&cq->thread_event, NULL, thread_handle, cq);
 
 	return cq;
 err:
@@ -419,11 +420,13 @@ int creqhttp_init_connection (creqhttp *cq) {
 			abort ();
 		}
 
+		printf ("cert file: %s\n", cq->cert_file);
 		if (SSL_CTX_use_certificate_file (cq->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
 			//ERR_print_errors_fp (stderr);
 			abort ();
 		}
 
+		printf ("private key file: %s\n", cq->private_key_file);
 		if (SSL_CTX_use_PrivateKey_file (cq->ctx, cq->private_key_file, SSL_FILETYPE_PEM) <= 0) {
 			//ERR_print_errors_fp (stderr);
 			abort ();
@@ -441,6 +444,7 @@ int creqhttp_init_connection (creqhttp *cq) {
 
 
 int creqhttp_accept_connections (creqhttp *cq) {
+	printf ("creqhttp accept connections\n");
 
 	while (1) {
 		int ret;
