@@ -32,8 +32,9 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 
 	data->ssl = SSL_new (cq->ctx);
 	SSL_set_fd (data->ssl, data->fd);
-	if (SSL_accept (data->ssl) <= 0) {
-		printf ("ssl accept error\n");
+	int ret = 0;
+	if (( ret = SSL_accept (data->ssl)) <= 0) {
+		printf ("ssl accept error: %d\n", ret);
 		//ERR_print_errors_fp (stderr);
 		SSL_free (data->ssl);
 		SSL_CTX_free (data->ctx);
@@ -317,6 +318,7 @@ static void *thread_handle (void *_data) {
 			 */
 			exit (EXIT_FAILURE);
 		}
+		printf ("new read data\n");
 
 		uint8_t *data = malloc (cq->max_buffer_size + 1);
 		data[cq->max_buffer_size] = 0;
