@@ -7,7 +7,6 @@
 #include <sys/epoll.h>
 #include <pthread.h>
 #include <creqhttp.h>
-#include <openssl/err.h>
 
 
 static creqhttp_epoll_event *cb_init_connection_open_fd (creqhttp_connection_params *cq) {
