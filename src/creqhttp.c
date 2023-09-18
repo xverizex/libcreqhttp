@@ -26,31 +26,9 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 	data->fd = cq->fd;
 	data->http = NULL;
 	data->first = 1;
+	data->ctx = cq->ctx;
 
-	const SSL_METHOD *method = NULL;
-	method = SSLv23_server_method ();
-	data->ctx = SSL_CTX_new (method);
-	if (data->ctx == NULL) {
-		ERR_print_errors_fp (stderr);
-		abort ();
-	}
-
-	if (SSL_CTX_use_certificate_file (data->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
-		ERR_print_errors_fp (stderr);
-		abort ();
-	}
-
-	if (SSL_CTX_use_PrivateKey_file (data->ctx, cq->private_key_file, SSL_FILETYPE_PEM) <= 0) {
-		ERR_print_errors_fp (stderr);
-		abort ();
-	}
-
-	if (!SSL_CTX_check_private_key (data->ctx)) {
-		fprintf (stderr, "private key does not match the public certificate\n");
-		abort ();
-	}
-
-	data->ssl = SSL_new (data->ctx);
+	data->ssl = SSL_new (cq->ctx);
 	SSL_set_fd (data->ssl, data->fd);
 	if (SSL_accept (data->ssl) == 0) {
 		ERR_print_errors_fp (stderr);
@@ -384,6 +362,11 @@ creqhttp *creqhttp_init (creqhttp_params *args) {
 	if (cq->epollfd == -1) {
 		goto err;
 	}
+	cq->is_ssl = args->is_ssl;
+	cq->cert_file = args->cert_file;
+	cq->private_key_file = args->private_key_file;
+	cq->ctx = NULL;
+	cq->ssl = NULL;
 
 	pthread_create (&cq->thread_event, NULL, thread_handle, cq);
 
@@ -424,6 +407,31 @@ int creqhttp_init_connection (creqhttp *cq) {
 
 	ret = listen (cq->sockfd, 0);
 
+	if (cq->is_ssl) {
+		const SSL_METHOD *method = NULL;
+		method = SSLv23_server_method ();
+		cq->ctx = SSL_CTX_new (method);
+		if (cq->ctx == NULL) {
+			ERR_print_errors_fp (stderr);
+			abort ();
+		}
+
+		if (SSL_CTX_use_certificate_file (cq->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
+			ERR_print_errors_fp (stderr);
+			abort ();
+		}
+
+		if (SSL_CTX_use_PrivateKey_file (cq->ctx, cq->private_key_file, SSL_FILETYPE_PEM) <= 0) {
+			ERR_print_errors_fp (stderr);
+			abort ();
+		}
+
+		if (!SSL_CTX_check_private_key (cq->ctx)) {
+			fprintf (stderr, "private key does not match the public certificate\n");
+			abort ();
+		}
+	}
+
 	return ret;
 }
 
@@ -443,7 +451,11 @@ int creqhttp_accept_connections (creqhttp *cq) {
 
 		creqhttp_connection_params params_init = {
 			.fd = clientfd,
-			.cq = cq
+			.cq = cq,
+			.cert_file = cq->cert_file,
+			.private_key_file = cq->private_key_file,
+			.is_ssl = cq->is_ssl,
+			.ctx = cq->ctx
 		};
 
 		/*

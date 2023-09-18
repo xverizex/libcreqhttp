@@ -60,6 +60,11 @@ typedef struct _creqhttp {
 	int max_buffer_size;
 	pthread_t thread_event;
 	uint16_t port;
+	SSL_CTX *ctx;
+	SSL *ssl;
+	char *cert_file;
+	char *private_key_file;
+	uint32_t is_ssl;
 } creqhttp;
 
 typedef struct _creqhttp_epoll_event {
@@ -78,6 +83,8 @@ typedef struct _creqhttp_connection_params {
 	creqhttp *cq;
 	char *cert_file;
 	char *private_key_file;
+	SSL_CTX *ctx;
+	int is_ssl;
 } creqhttp_connection_params;
 
 
@@ -106,6 +113,10 @@ typedef struct _creqhttp_params {
 	uint64_t max_alloc_memory;
 	void (*cb_handle) (creqhttp_epoll_event *_data);
 	uint16_t port;
+	char *cert_file;
+	char *private_key_file;
+	SSL_CTX *ctx;
+	SSL *ssl;
 } creqhttp_params;
 
 
