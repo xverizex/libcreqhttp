@@ -412,22 +412,22 @@ int creqhttp_init_connection (creqhttp *cq) {
 		method = SSLv23_server_method ();
 		cq->ctx = SSL_CTX_new (method);
 		if (cq->ctx == NULL) {
-			ERR_print_errors_fp (stderr);
+			//ERR_print_errors_fp (stderr);
 			abort ();
 		}
 
 		if (SSL_CTX_use_certificate_file (cq->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
-			ERR_print_errors_fp (stderr);
+			//ERR_print_errors_fp (stderr);
 			abort ();
 		}
 
 		if (SSL_CTX_use_PrivateKey_file (cq->ctx, cq->private_key_file, SSL_FILETYPE_PEM) <= 0) {
-			ERR_print_errors_fp (stderr);
+			//ERR_print_errors_fp (stderr);
 			abort ();
 		}
 
 		if (!SSL_CTX_check_private_key (cq->ctx)) {
-			fprintf (stderr, "private key does not match the public certificate\n");
+			//fprintf (stderr, "private key does not match the public certificate\n");
 			abort ();
 		}
 	}
