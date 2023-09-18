@@ -17,6 +17,7 @@ static creqhttp_epoll_event *cb_init_connection_open_fd (creqhttp_connection_par
 	data->fd = cq->fd;
 	data->http = NULL;
 	data->first = 1;
+	data->is_ssl = 0;
 
 	return data;
 }
@@ -29,6 +30,7 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 	data->http = NULL;
 	data->first = 1;
 	data->ctx = cq->ctx;
+	data->is_ssl = 1;
 
 	data->ssl = SSL_new (cq->ctx);
 	SSL_set_fd (data->ssl, data->fd);
