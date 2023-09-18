@@ -353,6 +353,8 @@ static void *thread_handle (void *_data) {
 			}
 
 			epoll_ctl (cq->epollfd, EPOLL_CTL_DEL, v->fd, NULL);
+			SSL_shutdown (v->ssl);
+			SSL_clear (v->ssl);
 			close (v->fd);
 		}
 	}
