@@ -318,8 +318,6 @@ static void *thread_handle (void *_data) {
 			 */
 			exit (EXIT_FAILURE);
 		}
-		printf ("new read data\n");
-
 		uint8_t *data = malloc (cq->max_buffer_size + 1);
 		data[cq->max_buffer_size] = 0;
 
@@ -332,11 +330,9 @@ static void *thread_handle (void *_data) {
 				SSL_read (v->ssl, data, cq->max_buffer_size):
 				read (v->fd, data, cq->max_buffer_size);
 
-			if (ret < 0) {
+			if (ret <= 0) {
+				epoll_ctl (cq->epollfd, EPOLL_CTL_DEL, v->fd, NULL);
 				close (v->fd);
-				if (epoll_ctl (cq->epollfd, EPOLL_CTL_DEL, v->fd, &cq->ev) == -1) {
-					continue;
-				}
 				continue;
 			}
 
