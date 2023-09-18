@@ -423,10 +423,8 @@ int creqhttp_init_connection (creqhttp *cq) {
 			abort ();
 		}
 
-		SSL_CTX_set_options (cq->ctx, SSL_OP_IGNORE_UNEXPECTED_EOF);
-
 		printf ("cert file: %s\n", cq->cert_file);
-		if (SSL_CTX_use_certificate_file (cq->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
+		if (SSL_CTX_use_certificate_chain_file (cq->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
 			//ERR_print_errors_fp (stderr);
 			abort ();
 		}
