@@ -30,7 +30,7 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 	data->ssl = SSL_new (cq->ctx);
 	SSL_set_fd (data->ssl, data->fd);
 	if (SSL_accept (data->ssl) == 0) {
-		ERR_print_errors_fp (stderr);
+		//ERR_print_errors_fp (stderr);
 		SSL_free (data->ssl);
 		SSL_CTX_free (data->ctx);
 		close (data->fd);
