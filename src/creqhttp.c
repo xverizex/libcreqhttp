@@ -10,7 +10,9 @@
 
 
 static creqhttp_epoll_event *cb_init_connection_open_fd (creqhttp_connection_params *cq) {
+	printf ("init open fd\n");
 	creqhttp_epoll_event *data = malloc (sizeof (creqhttp_epoll_event));
+	memset (data, 0, sizeof (creqhttp_epoll_event));
 	data->cq = cq->cq;
 	data->fd = cq->fd;
 	data->http = NULL;
@@ -20,6 +22,7 @@ static creqhttp_epoll_event *cb_init_connection_open_fd (creqhttp_connection_par
 }
 
 static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_params *cq) {
+	printf ("init ssl fd\n");
 	creqhttp_epoll_event *data = malloc (sizeof (creqhttp_epoll_event));
 	data->cq = cq->cq;
 	data->fd = cq->fd;
@@ -29,7 +32,8 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 
 	data->ssl = SSL_new (cq->ctx);
 	SSL_set_fd (data->ssl, data->fd);
-	if (SSL_accept (data->ssl) == 0) {
+	if (SSL_accept (data->ssl) <= 0) {
+		printf ("ssl accept error\n");
 		//ERR_print_errors_fp (stderr);
 		SSL_free (data->ssl);
 		SSL_CTX_free (data->ctx);
@@ -362,8 +366,8 @@ creqhttp *creqhttp_init (creqhttp_params *args) {
 		goto err;
 	}
 	cq->is_ssl = args->is_ssl;
-	cq->cert_file = args->cert_file;
-	cq->private_key_file = args->private_key_file;
+	cq->cert_file = strdup (args->cert_file);
+	cq->private_key_file = strdup (args->private_key_file);
 	cq->ctx = NULL;
 	cq->ssl = NULL;
 
@@ -448,6 +452,8 @@ int creqhttp_accept_connections (creqhttp *cq) {
 			return ret;
 		}
 
+		printf ("new connection\n");
+
 		creqhttp_connection_params params_init = {
 			.fd = clientfd,
 			.cq = cq,
@@ -468,6 +474,7 @@ int creqhttp_accept_connections (creqhttp *cq) {
 		cq->ev.events = EPOLLIN;
 		cq->ev.data.ptr = event_info;
 
+		printf ("add to epollfd\n");
 		if (epoll_ctl (cq->epollfd, EPOLL_CTL_ADD, clientfd, &cq->ev) == -1) {
 			free (event_info);
 			continue;
