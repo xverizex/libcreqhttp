@@ -36,8 +36,8 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 	if (( ret = SSL_accept (data->ssl)) <= 0) {
 		printf ("ssl accept error: %d\n", SSL_get_error (data->ssl, ret));
 		//ERR_print_errors_fp (stderr);
-		SSL_free (data->ssl);
-		SSL_CTX_free (data->ctx);
+		//SSL_free (data->ssl);
+		//SSL_CTX_free (data->ctx);
 		close (data->fd);
 		free (data);
 		data = NULL;
