@@ -329,7 +329,7 @@ static void *thread_handle (void *_data) {
 			int ret;
 			if (v->is_ssl) {
 				printf ("ssl read\n");
-				ret = SSL_read (v->ssl, data, cq->max_buffer_size):
+				ret = SSL_read (v->ssl, data, cq->max_buffer_size);
 			} else {
 				printf ("open read\n");
 				ret = read (v->fd, data, cq->max_buffer_size);
