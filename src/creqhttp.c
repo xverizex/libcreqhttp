@@ -355,6 +355,7 @@ static void *thread_handle (void *_data) {
 }
 
 creqhttp *creqhttp_init (creqhttp_params *args) {
+	SSL_library_init ();
 	OpenSSL_add_all_algorithms ();
 	SSL_load_error_strings ();
 
