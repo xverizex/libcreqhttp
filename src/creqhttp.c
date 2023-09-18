@@ -7,6 +7,7 @@
 #include <sys/epoll.h>
 #include <pthread.h>
 #include <creqhttp.h>
+#include <openssl/err.h>
 
 
 static creqhttp_epoll_event *cb_init_connection_open_fd (creqhttp_connection_params *cq) {
@@ -20,6 +21,47 @@ static creqhttp_epoll_event *cb_init_connection_open_fd (creqhttp_connection_par
 }
 
 static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_params *cq) {
+	creqhttp_epoll_event *data = malloc (sizeof (creqhttp_epoll_event));
+	data->cq = cq->cq;
+	data->fd = cq->fd;
+	data->http = NULL;
+	data->first = 1;
+
+	const SSL_METHOD *method = NULL;
+	method = SSLv23_server_method ();
+	data->ctx = SSL_CTX_new (method);
+	if (data->ctx == NULL) {
+		ERR_print_errors_fp (stderr);
+		abort ();
+	}
+
+	if (SSL_CTX_use_certificate_file (data->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
+		ERR_print_errors_fp (stderr);
+		abort ();
+	}
+
+	if (SSL_CTX_use_PrivateKey_file (data->ctx, cq->private_key_file, SSL_FILETYPE_PEM) <= 0) {
+		ERR_print_errors_fp (stderr);
+		abort ();
+	}
+
+	if (!SSL_CTX_check_private_key (data->ctx)) {
+		fprintf (stderr, "private key does not match the public certificate\n");
+		abort ();
+	}
+
+	data->ssl = SSL_new (data->ctx);
+	SSL_set_fd (data->ssl, data->fd);
+	if (SSL_accept (data->ssl) == 0) {
+		ERR_print_errors_fp (stderr);
+		SSL_free (data->ssl);
+		SSL_CTX_free (data->ctx);
+		close (data->fd);
+		free (data);
+		data = NULL;
+	}
+
+	return data;
 }
 
 static char *find_field (http_req *r, char *field) {
@@ -278,40 +320,6 @@ err:
 	return req;
 }
 
-
-#if 0
-static void func_handle (creqhttp_epoll_event *v) {
-
-	http_req *htr = NULL;
-
-
-	if (!v->http) {
-		htr = creqhttp_parse_request (v->data.data, v->data.len);
-		if (!htr) {
-			fprintf (stderr, "cannot get\n");
-			return;
-		}
-		v->http = htr;
-		FILE *fp = fopen ("data.out", "w");
-		size_t writed = fwrite (v->http->post_data, 1, v->http->left_size, fp);
-		v->http->left_size = 0;
-		fclose (fp);
-		v->first = 0;
-	} else {
-		FILE *fp = fopen ("data.out", "a");
-		v->http->left_size = 0;
-		v->http->content_length -= v->data.len;
-		size_t writed = fwrite (v->data.data, 1, v->data.len, fp);
-
-		if (v->http->content_length <= 0) {
-			free_http (v->http);
-			v->http = NULL;
-		}
-		fclose (fp);
-	}
-}
-#endif
-
 static void *thread_handle (void *_data) {
 	creqhttp *cq = (creqhttp *) _data;
 
@@ -337,7 +345,10 @@ static void *thread_handle (void *_data) {
 			creqhttp_epoll_event *v = (creqhttp_epoll_event *) cq->events[n].data.ptr;
 			creqhttp *cq = v->cq;
 
-			int ret = read (v->fd, data, cq->max_buffer_size);
+			int ret = v->is_ssl ?
+				SSL_read (v->ssl, data, cq->max_buffer_size):
+				read (v->fd, data, cq->max_buffer_size);
+
 			if (ret < 0) {
 				close (v->fd);
 				continue;
@@ -351,13 +362,19 @@ static void *thread_handle (void *_data) {
 
 			cq->cb_handle (v);
 
-			if (v->data.is_answer)
-				write (v->fd, v->data.ans_data, v->data.ans_len);
+			if (v->data.is_answer) {
+				v->is_ssl?
+					SSL_write (v->ssl, v->data.ans_data, v->data.ans_len):
+					write (v->fd, v->data.ans_data, v->data.ans_len);
+			}
 		}
 	}
 }
 
 creqhttp *creqhttp_init (creqhttp_params *args) {
+	OpenSSL_add_all_algorithms ();
+	SSL_load_error_strings ();
+
 	creqhttp *cq = malloc (sizeof (creqhttp));
 
 	cq->max_alloc_memory = args->max_alloc_memory;
@@ -446,22 +463,3 @@ int creqhttp_accept_connections (creqhttp *cq) {
 		}
 	}
 }
-
-#if 0
-int main (int argc, char **argv) {
-	int ret;
-
-	creqhttp_params args = {
-		.is_ssl = 0,
-		.port = 8080,
-		.cb_handle = func_handle
-	};
-	creqhttp *cq = creqhttp_init (&args);
-	ret = creqhttp_init_connection (cq);
-	if (ret == -1) {
-		fprintf (stderr, "ret == %d\n", ret);
-		exit (EXIT_FAILURE);
-	}
-	creqhttp_accept_connections (cq);
-}
-#endif

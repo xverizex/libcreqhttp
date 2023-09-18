@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/epoll.h>
+#include <openssl/ssl.h>
 
 enum {
 	REQ_UNSUPPORTED,
@@ -67,11 +68,16 @@ typedef struct _creqhttp_epoll_event {
 	int fd;
 	creqhttp_data data;
 	int first;
+	SSL_CTX *ctx;
+	SSL *ssl;
+	uint32_t is_ssl;
 } creqhttp_epoll_event;
 
 typedef struct _creqhttp_connection_params {
 	int fd;
 	creqhttp *cq;
+	char *cert_file;
+	char *private_key_file;
 } creqhttp_connection_params;
 
 
