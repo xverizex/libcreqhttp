@@ -424,7 +424,14 @@ int creqhttp_init_connection (creqhttp *cq) {
 		}
 
 		printf ("cert file: %s\n", cq->cert_file);
-		if (SSL_CTX_use_certificate_chain_file (cq->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
+#if 0
+		if (SSL_CTX_use_certificate_file (cq->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
+			//ERR_print_errors_fp (stderr);
+			abort ();
+		}
+#endif
+
+		if (SSL_CTX_use_certificate_chain_file (cq->ctx, cq->cert_file) <= 0) {
 			//ERR_print_errors_fp (stderr);
 			abort ();
 		}
