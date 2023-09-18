@@ -334,6 +334,9 @@ static void *thread_handle (void *_data) {
 
 			if (ret < 0) {
 				close (v->fd);
+				if (epoll_ctl (cq->epollfd, EPOLL_CTL_DEL, v->fd, &cq->ev) == -1) {
+					continue;
+				}
 				continue;
 			}
 
