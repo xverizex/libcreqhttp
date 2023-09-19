@@ -77,6 +77,8 @@ typedef struct _creqhttp_epoll_event {
 	SSL *ssl;
 	uint32_t is_ssl;
 	uint32_t is_disconnect;
+	uint32_t is_file_downloading;
+	int64_t file_left_size;
 } creqhttp_epoll_event;
 
 typedef struct _creqhttp_connection_params {
