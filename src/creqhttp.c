@@ -44,7 +44,7 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 	return data;
 }
 
-static char *find_field (http_req *r, char *field) {
+char *find_field (http_req *r, char *field) {
 	char *ret = NULL;
 	for (int i = 0; i < r->fields_size; i++) {
 		if (!strncmp (r->fields[i].field, field, strlen (field) + 1)) {
