@@ -44,7 +44,7 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 	return data;
 }
 
-char *find_field (http_req *r, char *field) {
+char *creqhttp_find_field (http_req *r, char *field) {
 	char *ret = NULL;
 	for (int i = 0; i < r->fields_size; i++) {
 		if (!strncmp (r->fields[i].field, field, strlen (field) + 1)) {
@@ -266,7 +266,7 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 		uint64_t filled_size = s - r;
 		uint64_t left_size = len - filled_size;
 
-		char *num = find_field (req, "Content-Length");
+		char *num = creqhttp_find_field (req, "Content-Length");
 		if (!num) {
 			goto err;
 		}
