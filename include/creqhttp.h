@@ -76,6 +76,7 @@ typedef struct _creqhttp_epoll_event {
 	SSL_CTX *ctx;
 	SSL *ssl;
 	uint32_t is_ssl;
+	uint32_t is_disconnect;
 } creqhttp_epoll_event;
 
 typedef struct _creqhttp_connection_params {
@@ -106,7 +107,6 @@ typedef struct _http_req {
 	uint8_t *post_data;
 	int64_t content_length;
 	uint64_t left_size;
-	uint32_t is_disconnect;
 } http_req;
 
 typedef struct _creqhttp_params {

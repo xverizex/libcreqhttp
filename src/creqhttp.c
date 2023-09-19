@@ -348,7 +348,7 @@ static void *thread_handle (void *_data) {
 			v->data.is_answer = 0;
 			v->data.ans_data = ans_data;
 			v->data.ans_len = 0L;
-			v->data.is_disconnect = 0;
+			v->is_disconnect = 0;
 
 			cq->cb_handle (v);
 
@@ -358,7 +358,7 @@ static void *thread_handle (void *_data) {
 					write (v->fd, v->data.ans_data, v->data.ans_len);
 			}
 
-			if (v->data.is_disconnect) {
+			if (v->is_disconnect) {
 				epoll_ctl (cq->epollfd, EPOLL_CTL_DEL, v->fd, NULL);
 				SSL_shutdown (v->ssl);
 				SSL_clear (v->ssl);
