@@ -79,6 +79,7 @@ typedef struct _creqhttp_epoll_event {
 	uint32_t is_disconnect;
 	uint32_t is_file_downloading;
 	int64_t file_left_size;
+	int32_t flags[10];
 } creqhttp_epoll_event;
 
 typedef struct _creqhttp_connection_params {

@@ -104,8 +104,6 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 	memcpy (r, _data, len);
 	r[len] = 0;
 
-	printf ("> %s\n", r);
-
 	uint8_t *end_of_header = strstr (r, "\r\n\r\n");
 	if (end_of_header) {
 		end_of_header[0] = end_of_header[1] = end_of_header[2] = end_of_header[3] = 0;
@@ -284,7 +282,6 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 		req->post_data = malloc (left_size + 1);
 		memcpy (req->post_data, s, left_size);
 		req->post_data[left_size] = 0;
-		printf ("--> %s\n", req->post_data);
 	}
 
 	if (r)
