@@ -348,6 +348,7 @@ static void *thread_handle (void *_data) {
 			v->data.is_answer = 0;
 			v->data.ans_data = ans_data;
 			v->data.ans_len = 0L;
+			v->data.is_disconnect = 0;
 
 			cq->cb_handle (v);
 
