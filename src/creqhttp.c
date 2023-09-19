@@ -282,6 +282,7 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 		req->post_data = malloc (left_size + 1);
 		memcpy (req->post_data, s, left_size);
 		req->post_data[left_size] = 0;
+		printf ("--> %s\n", req->post_data);
 	}
 
 	if (r)
