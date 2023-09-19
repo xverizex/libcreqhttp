@@ -319,6 +319,9 @@ static void *thread_handle (void *_data) {
 		uint8_t *data = malloc (cq->max_buffer_size + 1);
 		data[cq->max_buffer_size] = 0;
 
+		uint8_t *ans_data = malloc (cq->max_buffer_size + 1);
+		ans_data[cq->max_buffer_size] = 0;
+
 		for (int n = 0; n < nfds; n++) {
 
 			creqhttp_epoll_event *v = (creqhttp_epoll_event *) cq->events[n].data.ptr;
@@ -343,7 +346,7 @@ static void *thread_handle (void *_data) {
 			v->data.data = data;
 			v->data.len = ret;
 			v->data.is_answer = 0;
-			v->data.ans_data = NULL;
+			v->data.ans_data = ans_data;
 			v->data.ans_len = 0L;
 
 			cq->cb_handle (v);
