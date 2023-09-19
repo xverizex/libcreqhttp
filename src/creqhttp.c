@@ -10,7 +10,6 @@
 
 
 static creqhttp_epoll_event *cb_init_connection_open_fd (creqhttp_connection_params *cq) {
-	printf ("init open fd\n");
 	creqhttp_epoll_event *data = malloc (sizeof (creqhttp_epoll_event));
 	memset (data, 0, sizeof (creqhttp_epoll_event));
 	data->cq = cq->cq;
@@ -23,7 +22,6 @@ static creqhttp_epoll_event *cb_init_connection_open_fd (creqhttp_connection_par
 }
 
 static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_params *cq) {
-	printf ("init ssl fd\n");
 	creqhttp_epoll_event *data = malloc (sizeof (creqhttp_epoll_event));
 	data->cq = cq->cq;
 	data->fd = cq->fd;
@@ -37,9 +35,7 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 	int ret = 0;
 	if (( ret = SSL_accept (data->ssl)) <= 0) {
 		printf ("ssl accept error: %d\n", SSL_get_error (data->ssl, ret));
-		//ERR_print_errors_fp (stderr);
-		//SSL_free (data->ssl);
-		//SSL_CTX_free (data->ctx);
+		SSL_free (data->ssl);
 		close (data->fd);
 		free (data);
 		data = NULL;
@@ -330,21 +326,19 @@ static void *thread_handle (void *_data) {
 
 			int ret;
 			if (v->is_ssl) {
-				printf ("ssl read\n");
 				ret = SSL_read (v->ssl, data, cq->max_buffer_size);
 			} else {
-				printf ("open read\n");
 				ret = read (v->fd, data, cq->max_buffer_size);
 			}
-			printf ("readed: %d\n", ret);
 
 			if (ret <= 0) {
 				epoll_ctl (cq->epollfd, EPOLL_CTL_DEL, v->fd, NULL);
+				SSL_shutdown (v->ssl);
+				SSL_clear (v->ssl);
 				close (v->fd);
 				continue;
 			}
 			data[ret] = 0;
-			printf ("--\n%s--\n", v->data.data);
 
 			v->data.data = data;
 			v->data.len = ret;
@@ -359,11 +353,6 @@ static void *thread_handle (void *_data) {
 					SSL_write (v->ssl, v->data.ans_data, v->data.ans_len):
 					write (v->fd, v->data.ans_data, v->data.ans_len);
 			}
-
-			epoll_ctl (cq->epollfd, EPOLL_CTL_DEL, v->fd, NULL);
-			SSL_shutdown (v->ssl);
-			SSL_clear (v->ssl);
-			close (v->fd);
 		}
 	}
 }
@@ -433,31 +422,18 @@ int creqhttp_init_connection (creqhttp *cq) {
 		method = TLSv1_2_server_method ();
 		cq->ctx = SSL_CTX_new (method);
 		if (cq->ctx == NULL) {
-			//ERR_print_errors_fp (stderr);
 			abort ();
 		}
-
-		printf ("cert file: %s\n", cq->cert_file);
-#if 0
-		if (SSL_CTX_use_certificate_file (cq->ctx, cq->cert_file, SSL_FILETYPE_PEM) <= 0) {
-			//ERR_print_errors_fp (stderr);
-			abort ();
-		}
-#endif
 
 		if (SSL_CTX_use_certificate_chain_file (cq->ctx, cq->cert_file) <= 0) {
-			//ERR_print_errors_fp (stderr);
 			abort ();
 		}
 
-		printf ("private key file: %s\n", cq->private_key_file);
 		if (SSL_CTX_use_PrivateKey_file (cq->ctx, cq->private_key_file, SSL_FILETYPE_PEM) <= 0) {
-			//ERR_print_errors_fp (stderr);
 			abort ();
 		}
 
 		if (!SSL_CTX_check_private_key (cq->ctx)) {
-			//fprintf (stderr, "private key does not match the public certificate\n");
 			abort ();
 		}
 	}
@@ -468,7 +444,6 @@ int creqhttp_init_connection (creqhttp *cq) {
 
 
 int creqhttp_accept_connections (creqhttp *cq) {
-	printf ("creqhttp accept connections\n");
 
 	while (1) {
 		int ret;
@@ -507,7 +482,6 @@ int creqhttp_accept_connections (creqhttp *cq) {
 		cq->ev.events = EPOLLIN;
 		cq->ev.data.ptr = event_info;
 
-		printf ("add to epollfd\n");
 		if (epoll_ctl (cq->epollfd, EPOLL_CTL_ADD, clientfd, &cq->ev) == -1) {
 			free (event_info);
 			continue;
