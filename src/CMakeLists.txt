@@ -2,7 +2,7 @@ include (FindPkgConfig)
 
 pkg_check_modules (SSL libssl)
 
-add_library (creqhttp
+add_library (creqhttp SHARED
 		creqhttp.c
 	)
 
