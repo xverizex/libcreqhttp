@@ -34,7 +34,6 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 	SSL_set_fd (data->ssl, data->fd);
 	int ret = 0;
 	if (( ret = SSL_accept (data->ssl)) <= 0) {
-		printf ("ssl accept error: %d\n", SSL_get_error (data->ssl, ret));
 		SSL_free (data->ssl);
 		close (data->fd);
 		free (data);
@@ -251,7 +250,7 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 		s++;
 	}
 
-#if 1
+#if 0
 	for (int i = 0; i < req->fields_size; i++) {
 		printf ("(%s == %s)\n",
 				req->fields[i].field,
@@ -467,8 +466,6 @@ int creqhttp_accept_connections (creqhttp *cq) {
 			return ret;
 		}
 
-		printf ("new connection\n");
-
 		creqhttp_connection_params params_init = {
 			.fd = clientfd,
 			.cq = cq,
@@ -483,7 +480,6 @@ int creqhttp_accept_connections (creqhttp *cq) {
 		 */
 		creqhttp_epoll_event *event_info = cq->cb_init_connection (&params_init);
 		if (event_info == NULL) {
-			printf ("close client fd\n");
 			close (clientfd);
 			continue;
 		}
