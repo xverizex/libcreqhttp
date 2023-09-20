@@ -7,6 +7,7 @@
 #include <sys/epoll.h>
 #include <pthread.h>
 #include <creqhttp.h>
+#include <openssl/err.h>
 
 
 static creqhttp_epoll_event *cb_init_connection_open_fd (creqhttp_connection_params *cq) {
@@ -34,6 +35,7 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 	SSL_set_fd (data->ssl, data->fd);
 	int ret = 0;
 	if (( ret = SSL_accept (data->ssl)) <= 0) {
+		ERR_print_errors_fp (stdout);
 		SSL_free (data->ssl);
 		close (data->fd);
 		free (data);
