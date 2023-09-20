@@ -460,13 +460,16 @@ int creqhttp_init_connection (creqhttp *cq) {
 int creqhttp_accept_connections (creqhttp *cq) {
 
 	while (1) {
-		int ret;
+		int ret = 0;
 		int clientfd;
 		struct sockaddr_in s;
 		socklen_t size_s = sizeof (s);
 		ret = clientfd = accept (cq->sockfd, (struct sockaddr *) &s, &size_s);
 		if (ret == -1) {
 			perror ("accept");
+			FILE *fp = fopen ("error.log", "w");
+			fwrite ("fuck", 5, 1, fp);
+			fclose (fp);
 			return ret;
 		}
 
