@@ -463,6 +463,7 @@ int creqhttp_accept_connections (creqhttp *cq) {
 		socklen_t size_s = sizeof (s);
 		ret = clientfd = accept (cq->sockfd, (struct sockaddr *) &s, &size_s);
 		if (ret == -1) {
+			perror ("accept");
 			return ret;
 		}
 
