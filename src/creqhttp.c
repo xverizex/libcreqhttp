@@ -313,6 +313,7 @@ static void *thread_handle (void *_data) {
 			/*
 			 * TODO: implement correct exit
 			 */
+			perror ("epoll_wait");
 			exit (EXIT_FAILURE);
 		}
 		uint8_t *data = malloc (cq->max_buffer_size + 1);
