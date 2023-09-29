@@ -129,6 +129,14 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 		goto err;
 	}
 
+	/* check if ascii */
+	uint64_t lh = end_of_header - r;
+	for (uint64_t i = 0; i < lh; i++) {
+		if (r[i] >= ' ' && r[i] <= '~')
+			continue;
+		goto err;
+	}
+
 	for (uint64_t i = 0; i < len; i++) {
 		if (r[i] == 0)
 			break;
