@@ -64,7 +64,7 @@ static creqhttp_epoll_event *cb_init_connection_ssl_fd (creqhttp_connection_para
 
 char *creqhttp_find_field (http_req *r, char *field) {
 	char *ret = NULL;
-	for (int i = 0; i < r->fields_size; i++) {
+	for (uint64_t i = 0; i < r->fields_size; i++) {
 		if (!strncmp (r->fields[i].field, field, strlen (field) + 1)) {
 			ret = r->fields[i].value;
 			break;
@@ -163,15 +163,15 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 	/* get type of request */
 	struct requests {
 		char *name;
-		uint32_t type;
+		uint64_t type;
 	} requests[] = {
 		{"GET", REQ_GET},
 		{"POST", REQ_POST}
 	};
 
-	uint32_t count_requests = sizeof (requests) / sizeof (struct requests);
-	uint32_t found_type = REQ_UNSUPPORTED;
-	for (uint32_t i = 0; i < count_requests; i++) {
+	uint64_t count_requests = sizeof (requests) / sizeof (struct requests);
+	uint64_t found_type = REQ_UNSUPPORTED;
+	for (uint64_t i = 0; i < count_requests; i++) {
 		if (!memcmp (requests[i].name, r, strlen (r))) {
 			found_type = requests[i].type;
 			break;
@@ -186,7 +186,7 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 	if (s)
 		while (*s == 0) s++;
 	
-	uint32_t len_s = strlen (s);
+	uint64_t len_s = strlen (s);
 	line_req = s;
 	if (!line_req)
 		goto err;
@@ -198,8 +198,8 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 	http_version = s;
 
 	/* fill header request */
-	uint32_t len_line = strlen (line_req);
-	uint32_t len_http_version = strlen (http_version);
+	uint64_t len_line = strlen (line_req);
+	uint64_t len_http_version = strlen (http_version);
 
 	if (len_line >= HTTP_LINE)
 		goto err;
@@ -214,10 +214,10 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 	memcpy (req->req.line, line_req, len_line + 1);
 	memcpy (req->req.version_http, http_version, len_http_version + 1);
 
-	uint32_t count_in_block = 20;
-	uint32_t cur_block = 1;
+	uint64_t count_in_block = 20;
+	uint64_t cur_block = 1;
 
-	uint32_t max_alloc_fields = cur_block * count_in_block;
+	uint64_t max_alloc_fields = cur_block * count_in_block;
 	req->fields_size = 0;
 	req->fields = malloc (sizeof (http_header_field) * max_alloc_fields);
 	
@@ -229,7 +229,7 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 	while (*s == 0) s++;
 
 	while (s <= end_of_header) {
-		uint32_t len = 0;
+		uint64_t len = 0;
 		char *s_end = NULL;
 		while (*s == ' ' && *s != 0) s++;
 		if (*s == 0) {
@@ -255,7 +255,7 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 		char *val_start = (s_end + 1);
 		while (*val_start == ' ') val_start++;
 
-		uint32_t index = req->fields_size++;
+		uint64_t index = req->fields_size++;
 		req->fields[index].field = NULL;
 		req->fields[index].value = NULL;
 		if (req->fields_size >= max_alloc_fields) {
@@ -302,6 +302,9 @@ http_req *creqhttp_parse_request (uint8_t *_data, uint64_t len) {
 		}
 
 		uint64_t size = atol (num);
+
+		if (size < left_size)
+			goto err;
 
 		req->left_size = left_size;
 		req->content_length = size - left_size;
