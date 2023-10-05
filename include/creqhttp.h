@@ -74,7 +74,7 @@ typedef struct _creqhttp {
 	struct epoll_event events[MAX_EVENTS];
 	int epollfd;
 	int sockfd;
-	int max_buffer_size;
+	uint64_t max_buffer_size;
 	pthread_t thread_event;
 	uint16_t port;
 	SSL_CTX *ctx;
@@ -123,9 +123,9 @@ typedef struct _http_header_field {
 typedef struct _http_req {
 	http_header_req req;
 	http_header_field *fields;
-	uint32_t fields_size;
+	uint64_t fields_size;
 	uint8_t *post_data;
-	int64_t content_length;
+	uint64_t content_length;
 	uint64_t left_size;
 } http_req;
 
